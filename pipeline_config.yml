@@ -16,13 +16,6 @@ steps:
   deployToCfWithCliMTA:
     dockerImage: 'docker.wdf.sap.corp:51162/s4sdk/docker-cf-cli-mta'
 
-  executeNpm:
-    dockerImage: 'docker.wdf.sap.corp:51162/s4sdk/docker-node-browsers'
-
-#  checkFindbugs and checkPmd must be explicitly overriden currently -> default config is to scan module 'application' -> in mta we only execute it in the java modules
-  checkFindbugs:
-      includeFilterFile: s4hana_findbugs_include_filter.xml
-
   mtaBuild:
     dockerImage: 'docker.wdf.sap.corp:51162/s4sdk/docker-cf-cli-mta'
     mtaJarLocation: '/usr/local/bin/mta_builder.jar'

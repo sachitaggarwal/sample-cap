@@ -1,0 +1,92 @@
+#Project Setup
+general:
+  productiveBranch: 'master'
+
+#Steps Specific Configuration
+steps:
+  executeMaven:
+#    dockerImage: 'maven:3.5.0-jdk-8'
+    globalSettingsFile: ''
+    projectSettingsFile : ''
+
+  deployToCfWithCli:
+#    dockerImage: 's4sdk/docker-cf-cli'
+    smokeTestStatusCode: '200'
+
+  deployToCfWithCliMTA:
+    dockerImage: 'docker.wdf.sap.corp:51162/s4sdk/docker-cf-cli-mta'
+
+  executeNpm:
+    dockerImage: 'docker.wdf.sap.corp:51162/s4sdk/docker-node-browsers'
+
+#  checkFindbugs and checkPmd must be explicitly overriden currently -> default config is to scan module 'application' -> in mta we only execute it in the java modules
+  checkFindbugs:
+      includeFilterFile: s4hana_findbugs_include_filter.xml
+
+  mtaBuild:
+    dockerImage: 'docker.wdf.sap.corp:51162/s4sdk/docker-cf-cli-mta'
+    mtaJarLocation: '/usr/local/bin/mta_builder.jar'
+
+
+#Stage Specific Configurations
+stages:
+  staticCodeChecks:
+    findbugsExcludesFile: '' #Path to findbugs exclude file
+    pmdExcludes: '' # List or ANT style patterns
+
+  integrationTests:
+    credentials:
+      - alias: 'ERP_SYSTEM'
+        credentialId: 'CXT'
+
+  s4SdkQualityChecks:
+#  defaults to all java modules in MTA Projects if no scan module given
+    scanModules:
+      - srv
+#      - bdc
+    jacocoExcludes:
+      - ''
+    nonErpDestinations:
+      - ''
+
+# TODO Replace Checkmarx  with own configuration!
+#  checkmarxScan:
+#    checkMarxProjectName: 'SAP Cap Pipeline'
+#    groupId: '898facce-6dca-4cb4-8659-5ba1e873a7a6'
+#    filterPattern: '!target/**, Frontend/**'
+#    fullScansScheduled: false
+#    generatePdfReport: true
+#    incremental: true
+#    preset: '100008' # 100106 = SAP_Default_JavaScript
+#    vulnerabilityThresholdMedium: 10
+#    vulnerabilityThresholdLow: 100
+
+  whitesourceScan:
+    product: 'SHC - CAN BE DELETED'
+    credentialsId: 'whitesource-orgToken'
+
+#  sourceClearScan:
+#    credentialsId: 'SRCCLR_API_TOKEN'
+#    config:
+#      vuln_methods_extra_ignored_directories: docs, srv/integration-tests, srv/unit-tests, srv/src/test, base_project/backup
+#      scope: production
+
+  productionDeployment:
+    cfTargets:
+      - org: 'CloudApps'
+        space: 'Prod'
+        apiEndpoint: 'https://api.cf.sap.hana.ondemand.com'
+        credentialsId: 'CF-DEPLOY-SAP'
+
+  artifactDeployment:
+      nexus:
+#      ArtifactId is default the ID from the MTA.yaml -> can be overwritten
+#        artifactId:
+#        credentialsId: '12345677'
+        groupId: 'com.sap.cloud.s4hana.examples'
+        version: 'nexus3'
+        url: 'cejenkinsdocker.c.eu-de-1.cloud.sap:8081'
+        repository: 'maven-mixed'
+
+  cloudFoundryDeploy:
+    dockerImage: 'docker.wdf.sap.corp:51162/s4sdk/docker-cf-cli-mta'

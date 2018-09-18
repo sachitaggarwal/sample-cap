@@ -1,0 +1,18 @@
+{
+	"name": "my.app",
+	"description": "A simple data model for SAP CP application",
+	"version": "1.0.0",
+	"dependencies": {
+		"@sap/cds": "2.x"
+	},
+	"scripts": {
+		"build": "cds build --clean"
+	},
+	"cds": {
+		"service": {
+			"model": "srv/",
+			"dest": "srv/application/src/main/resources/edmx"
+		}
+	},
+	"private": true
+}

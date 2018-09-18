@@ -1,0 +1,10 @@
+{
+  "erp": {
+    "default": "ERP_SYSTEM",
+    "systems": [
+      {
+        "alias": "ERP_SYSTEM",
+        "uri": "https://mock-server-unrotatory-visualisation.cfapps.sap.hana.ondemand.com"
+      }
+    ]
+  }}

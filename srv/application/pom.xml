@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>address-manager-cap - Application</name>
+    <description>address-manager-cap - Application</description>
+
+    <artifactId>address-manager-cap-application</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <parent>
+        <groupId>com.sap.cloud.s4hana.examples</groupId>
+        <artifactId>address-manager-cap</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+        <servicesdk.version>1.19.0</servicesdk.version>
+        <packageName>com.sap.cloud.s4hana.examples</packageName>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>25.1-jre</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.checkerframework</groupId>
+                        <artifactId>checker-qual</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.sap.cloud.servicesdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${servicesdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sap.cloud.s4hana.cloudplatform</groupId>
+            <artifactId>scp-cf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sap.cloud.s4hana</groupId>
+            <artifactId>s4hana-all</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- OData V2 (Hybrid) Provisioning Dependencies -->
+
+        <!-- SAP Gateway Runtime, provides OData services -->
+        <dependency>
+            <groupId>com.sap.cloud.servicesdk.prov</groupId>
+            <artifactId>odatav2</artifactId>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.sap.cloud.servicesdk.prov</groupId>
+            <artifactId>api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sap.cloud.servicesdk.prov</groupId>
+            <artifactId>odatav2-prov</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sap.cloud.servicesdk.prov</groupId>
+            <artifactId>odata-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sap.cloud.servicesdk.prov</groupId>
+            <artifactId>odatav2-hybrid</artifactId>
+        </dependency>
+
+        <!-- Olingo Dependencies -->
+        <dependency>
+            <groupId>com.sap.cloud.servicesdk.prov</groupId>
+            <artifactId>odatav2-lib</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <attachClasses>true</attachClasses>
+                    <!--This plugin's configuration is used to dynamically generate context
+					parameter "package" in the web.xml in the generated war file -->
+                    <webResources>
+                        <resource>
+                            <filtering>true</filtering>
+                            <directory>src/main/webapp</directory>
+                            <includes>
+                                <include>**/web.xml</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.openejb.maven</groupId>
+                <artifactId>tomee-maven-plugin</artifactId>
+                <version>1.7.5</version>
+                <configuration>
+                    <tomeeClassifier>jaxrs</tomeeClassifier>
+                    <context>ROOT</context>
+                    <libs>
+                        <lib>remove:slf4j-jdk14</lib>
+                    </libs>
+                </configuration>
+            </plugin>
+
+            <!-- CAP Change Start -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <configuration>
+                    <executable>npm</executable>
+                    <workingDirectory>${project.basedir}/../../</workingDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <arguments>
+                                <argument>ci</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm run build</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>build</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- CAP Change End -->
+        </plugins>
+    </build>
+</project>
